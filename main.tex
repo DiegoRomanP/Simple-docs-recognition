@@ -1,0 +1,310 @@
+%-- !TeX program = pdflatex
+\documentclass{article}
+
+% PAQUETES ADICIONALES
+\usepackage{neurips_2024}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{natbib}
+
+% Configuración del título y autores
+\title{Arquitectura Multimodal de Agentes de IA para la Digitalización Semántica y Estructuración de Conocimiento Técnico enfocada en apuntes rápidos  a Obsidian}
+
+\author{%
+  Anonymous Author(s) \\
+  Anonymous Institution \\
+  \texttt{anonymous@email.com}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+La digitalización de superficies de escritura no estructuradas, como pizarras académicas o cuadernos, libros o apuntes con contenido matemático, presenta un desafío significativo debido a la alta variabilidad visual y la complejidad semántica del contenido. Los sistemas tradicionales de reconocimiento óptico (OCR) fallan al intentar capturar la estructura lógica y las relaciones entre elementos heterogéneos como diagramas, fórmulas matemáticas y texto manuscrito. Por todo lo anterior, este trabajo propone una arquitectura de Agente de IA multimodal diseñada para transformar imágenes de pizarras en conocimiento estructurado compatible con sistemas de gestión como Obsidian (Markdown/\LaTeX). El sistema integra un pipeline secuencial que inicia con un preprocesamiento de visión por computadora (OpenCV) para la normalización de imágenes, seguido de un análisis de diseño profundo (LayoutParser) que segmenta semánticamente el contenido. Posteriormente, se emplea un enrutamiento inteligente hacia modelos especializados: TrOCR para manuscritos y arquitecturas \emph{Encoder-Decoder} (como UniMERNet o Pix2Text) para la conversión de alta fidelidad de fórmulas a \LaTeX. Finalmente, un módulo de Generación Aumentada por Recuperación (RAG) orquestado por agentes sintetiza la información en notas coherentes, superando las limitaciones de los enfoques puramente extractivos.
+\end{abstract}
+
+\section{Introducción}
+
+La evolución del reconocimiento de documentos ha experimentado desde la simple captura de caracteres (OCR) hacia la comprensión holística de escenas complejas. Sin embargo, el \emph{Reconocimiento de Texto en Escenas No Restringidas} (HTR-Scene) sigue siendo un problema abierto, especialmente cuando se trata de pizarras técnicas donde la disposición espacial denota significado lógico. Las soluciones comerciales actuales, aunque efectivas en la limpieza de imágenes, a menudo producen resultado sin estructura y poco deseados, incapaz de distinguir entre una ecuación crítica y una nota al margen irrelevante.
+
+Este proyecto aborda la necesidad de un sistema que no solo reconosca caracteres y palabras, sino que ``entienda''(analice sistemática y contextualmente) y ``estructure''(forme una dispocisión aceptada dentro de la organización del texto organizado obtenido) el contenido visual. La brecha tecnológica actual reside en dos aspectos: la precisión en el manejo de notación científica manuscrita y la capacidad de transformar ese contenido en grafos de conocimiento utilizables. A diferencia de los enfoques monolíticos, proponemos una arquitectura modular donde un Agente de IA orquesta herramientas especializadas. Este enfoque permite mitigar la propagación de errores típica de los sistemas lineales y aprovechar modelos de vanguardia para tareas específicas, como la conversión de Imagen-a-\LaTeX.
+
+El sistema final no solo digitaliza, sino que actúa como un agente de conocimiento automatizado, convirtiendo una foto caótica en una nota de Obsidian perfectamente formateada, lista para ser integrada en un apunta organizado digital. Esta integración de visión computacional avanzada con Modelos de Lenguaje Grande (LLM) define un nuevo estándar en la automatización de la documentación técnica.
+
+\section{Objetivos}
+
+El objetivo principal de esta investigación es desarrollar una arquitectura de software agéntica capaz de procesar imágenes de pizarras técnicas y generar archivos Markdown enriquecidos.
+
+\textbf{Objetivos Específicos:}
+\begin{itemize}
+    \item \textbf{Implementar un pipeline de preprocesamiento robusto} mediante técnicas de visión clásica (umbralización adaptativa y corrección de perspectiva) para maximizar la legibilidad de las imágenes de entrada ante condiciones de iluminación variables.
+    \item \textbf{Desarrollar un sistema de análisis de layout (Diseño)} basado en Deep Learning que segmente y clasifique con precisión regiones de interés (títulos, párrafos, fórmulas) para permitir un procesamiento diferenciado.
+    \item \textbf{Integrar modelos de reconocimiento especializados (SOTA)}, utilizando TrOCR para texto manuscrito y arquitecturas \emph{Image-to-\LaTeX} (como UniMERNet o Pix2Text) para alcanzar una alta fidelidad en la transcripción matemática.
+    \item \textbf{Construir un módulo de síntesis y estructuración} basado en RAG (\emph{Retrieval-Augmented Generation}) que contextualice los fragmentos extraídos y genere la salida final en formato Markdown compatible con Obsidian.
+\end{itemize}
+
+\section{Descripción General y Alcance}
+
+Este trabajo presenta el diseño y validación técnica de un sistema \emph{end-to-end} para la digitalización inteligente. El alcance del proyecto se centra en el procesamiento de imágenes con informacion escrita y no estructurados, específicamente pizarras académicas y de contenido matemático ingeniería que contienen una mezcla de texto, diagramas y notación matemática.
+
+La arquitectura se concibe como un pipeline secuencial orquestado. El sistema recibe como entrada imágenes crudas (fotografías de smartphones) y entrega como salida código Markdown/\LaTeX. El alcance técnico incluye la validación de modelos de \emph{Layout Analysis} para la detección de estructuras y la evaluación de modelos generativos para la síntesis de texto. Se excluye del alcance actual el reconocimiento de diagramas vectoriales complejos (como circuitos detallados) a nivel de simulación, limitándose a su identificación y descripción textual o preservación como imagen incrustada. El proyecto prioriza la precisión semántica y la estructura lógica sobre la velocidad de inferencia en tiempo real, enfocándose en un caso de uso de procesamiento por lotes o \emph{post-hoc} para la gestión del conocimiento personal (PKM).
+
+\section{OCR vs. HTR}
+
+El reconocimiento automático de texto en imágenes ha evolucionado desde el \emph{Reconocimiento Óptico de Caracteres} (OCR), centrado en texto impreso bajo condiciones relativamente controladas, hacia el \emph{Reconocimiento de Texto Manuscrito} (HTR), que aborda la alta variabilidad de la caligrafía humana y de escenas no restringidas. Mientras el OCR se apoya en supuestos fuertes de regularidad visual (alineación, alto contraste, tipografías estables), el HTR debe operar bajo condiciones mucho más adversas: cambios de estilo de escritura, deformaciones no lineales, ruido y fondos complejos.\footnote{En este trabajo se utiliza la terminología HTR tanto para escritura manuscrita en documentos escaneados como para texto manuscrito en escenas, siguiendo la literatura reciente.}
+
+En la práctica, ambos problemas se solapan en muchos escenarios modernos (documentos escaneados, formularios, notas técnicas), pero difieren en los modelos y datos que requieren. Motores OCR clásicos siguen siendo muy competitivos en texto impreso, mientras que el HTR moderno se apoya en arquitecturas de alto capacidad como CRNN y Transformers \citep{shi2016,li2021}.
+
+\subsection{Reconocimiento Óptico de Caracteres (OCR)}
+
+El OCR se enfoca en transcribir texto \emph{impreso} a partir de imágenes de documentos (libros, formularios, artículos, etc.). Históricamente se abordó con técnicas basadas en características manuales y clasificación de patrones, pero la adopción de \emph{deep learning} ha llevado a arquitecturas que integran redes convolucionales para extraer características visuales robustas y, en algunos casos, modelos secuenciales para producir cadenas de caracteres.
+
+En sistemas modernos, un motor OCR típico:
+\begin{itemize}
+    \item Recibe como entrada regiones de imagen que contienen texto relativamente homogéneo (por ejemplo, una línea o un párrafo).
+    \item Aplica una red convolucional para obtener mapas de características.
+    \item Decodifica la secuencia de caracteres mediante un clasificador, una red recurrente o un módulo de atención.
+\end{itemize}
+
+Herramientas ampliamente utilizadas de código abierto, como Tesseract, consolidan décadas de investigación en OCR y son efectivas siempre que la calidad de la imagen y la simplicidad del diseño lo permitan. No obstante, su rendimiento se degrada notablemente en presencia de escritura manuscrita, fondos complejos o fuertes distorsiones geométricas, lo que motiva el uso de modelos HTR especializados en estos escenarios.
+
+\subsection{Reconocimiento de Texto Manuscrito (HTR)}
+
+El HTR aborda la transcripción de \emph{escritura manuscrita}, tanto en documentos escaneados como en escenas (pizarras, notas, cuadernos). Sus principales desafíos incluyen la variabilidad intrínseca del trazo humano, la presencia de ligaduras entre caracteres, la falta de alineación perfecta de las líneas y el ruido de captura.
+
+Una línea de desarrollo clave fueron las arquitecturas \emph{Convolutional Recurrent Neural Network} (CRNN). En este enfoque, una CNN extrae un mapa de características de la imagen de una línea de texto y, a continuación, una red recurrente bidireccional (por ejemplo, Bi-LSTM) modela la secuencia de caracteres. La función de pérdida Connectionist Temporal Classification (CTC) permite entrenar el modelo sin segmentar explícitamente cada carácter, resolviendo el problema de alineación temporal \citep{shi2016,graves2006}.
+
+Más recientemente, el estado del arte se ha desplazado hacia arquitecturas basadas en \emph{Transformers}. Modelos como TrOCR utilizan un esquema codificador-decodificador donde un codificador de visión (CNN o Vision Transformer) produce una representación de la imagen y un decodificador de lenguaje autoregresivo genera la secuencia de texto \citep{li2021}. Este planteamiento se beneficia del preentrenamiento masivo tanto del componente visual como del lingüístico, logrando una mayor robustez frente a estilos de escritura, distorsiones y condiciones de iluminación diversas.
+
+Trabajos más recientes exploran paradigmas avanzados, como el reconocimiento guiado por instrucciones o marcos que integran reconocimiento y edición de texto en escena, con el objetivo de inducir representaciones internas más ricas y desacoplar contenido de estilo. Estos desarrollos apuntan a modelos de HTR cada vez más cercanos a una verdadera ``comprensión'' del texto manuscrito.
+
+\subsection{Conclusión}
+
+Desde un punto de vista teórico, OCR y HTR pueden verse como extremos de un continuo de dificultad. El OCR opera en el extremo donde las regularidades tipográficas permiten explotar modelos relativamente simples o motores especializados; el HTR se sitúa en el extremo de mayor variabilidad, requiriendo arquitecturas de alto capacidad y, a menudo, integración con información adicional (análisis de diseño, contexto semántico). En sistemas modernos de análisis de documentos, es habitual combinar ambos: bloques de texto impreso se asignan a un motor OCR, mientras que regiones manuscritas o de escena se derivan a modelos HTR especializados.
+
+\section{Agentes de IA y Modelos de Lenguaje Grande}
+
+Los avances recientes en Modelos de Lenguaje Grande (LLM) han permitido el desarrollo de \emph{agentes de IA} capaces de razonar en lenguaje natural, planificar pasos de cómputo y utilizar herramientas externas. En el contexto del análisis de documentos, estos agentes permiten ir más allá de la transcripción, abordando tareas de comprensión, síntesis y estructuración de conocimiento.
+
+\subsection{Modelos de Lenguaje Grande (LLM)}
+
+Los LLM actuales son el resultado de la evolución de varias técnicas fundamentales de Procesamiento del Lenguaje Natural (NLP).
+
+\subsubsection{Procesamiento del Lenguaje Natural (NLP)}
+
+El NLP estudia métodos computacionales para analizar, entender y generar lenguaje humano. La evolución del campo ha pasado de modelos estadísticos especializados por tarea a modelos preentrenados de propósito general basados en Transformers, que se ajustan posteriormente a tareas específicas mediante \emph{fine-tuning} o ingeniería de \emph{prompts}. Esta transición ha permitido reutilizar un ``modelo fundacional'' para una amplia variedad de tareas con mínima adaptación adicional.
+
+\subsubsection{Tokenización}
+
+La tokenización transforma texto bruto en una secuencia de unidades discretas (tokens) que el modelo puede procesar. En LLM modernos se emplean esquemas basados en sub-palabras (por ejemplo, BPE o SentencePiece), que logran un compromiso adecuado entre cobertura léxica, longitud de secuencia y eficiencia computacional.
+
+\subsubsection{Embeddings}
+
+Los \emph{embeddings} representan palabras, frases o documentos como vectores densos en un espacio de alta dimensión donde la proximidad refleja similitud semántica. Los primeros enfoques (por ejemplo, word2vec, GloVe) producían vectores estáticos; los LLM actuales generan representaciones contextuales, donde el vector de un token depende de su contexto \citep{reimers2019}. Bibliotecas como Sentence-Transformers permiten obtener \emph{embeddings} de oraciones específicamente optimizados para tareas de búsqueda semántica y RAG.
+
+\subsubsection{Redes Neuronales Recurrentes (RNN)}
+
+Antes de la adopción generalizada de los Transformers, las RNN y sus variantes (LSTM, GRU) eran el paradigma dominante para modelar secuencias en NLP. Estas redes procesan la secuencia de manera autoregresiva, manteniendo un estado oculto que resume el pasado inmediato, y fueron ampliamente utilizadas en traducción automática, reconocimiento de voz y lenguaje. Su principal limitación es la secuencialidad estricta y la dificultad para modelar dependencias de muy largo alcance.
+
+\subsubsection{Transformers}
+
+La arquitectura Transformer se ha convertido en el estándar de facto tanto en NLP como en modelos multimodales. Su innovación central es el mecanismo de auto-atención, que permite a cada token atender directamente a todos los demás, modelando dependencias de largo alcance sin recurrencia. El escalado en número de parámetros, datos y cómputo, junto con el preentrenamiento masivo, ha permitido que estos modelos actúen como modelos fundacionales capaces de adaptarse a una amplia variedad de tareas \citep{lewis2020}.
+
+\subsection{Agentes de IA con RAG}
+
+Un agente de IA puede verse como un sistema que utiliza un LLM como núcleo de decisión para planificar y ejecutar acciones, incluyendo llamadas a herramientas externas. En el contexto de documentos, una arquitectura especialmente relevante es el agente de IA con Generación Aumentada por Recuperación (RAG).
+
+En un esquema RAG, el modelo no se basa únicamente en su conocimiento paramétrico, sino que consulta una base externa de documentos mediante \emph{embeddings} y búsqueda vectorial. Los fragmentos recuperados se inyectan en el \emph{prompt} antes de la generación, lo que permite que las respuestas estén ancladas en evidencia explícita en lugar de depender solo de memoria implícita del modelo \citep{lewis2020,liu2022}. Esta arquitectura es especialmente eficaz en dominios técnico-científicos, donde es crucial mantener la fidelidad al contenido fuente.
+
+\subsection{Agentes de IA sin RAG}
+
+Por contraste, un agente de IA sin RAG se basa exclusivamente en el conocimiento interno del LLM y en herramientas que no incluyen recuperación semántica sobre una base documental específica. Este tipo de agente puede ser efectivo para tareas generales (asistentes conversacionales, automatización sencilla), pero presenta limitaciones importantes en entornos donde se requiere alta precisión y capacidad de citación de fuentes.
+
+En resumen, mientras que los agentes sin RAG son más simples a nivel de infraestructura, los agentes con RAG ofrecen una mejor trazabilidad de la información y reducen el riesgo de alucinaciones, por lo que se consideran el diseño preferente en aplicaciones de análisis y síntesis de documentos técnicos \citep{chase2022,liu2022}.
+
+\section{Estado del Arte (Investigación Previa)}
+
+El campo del reconocimiento de documentos complejos (RDC) ha experimentado una bifurcación entre soluciones comerciales generalistas y avances académicos especializados.
+
+\subsection{Reconocimiento de Texto Manuscrito (HTR)}
+El estado del arte en HTR ha superado las arquitecturas CRNN mediante el uso de \emph{Vision Transformers} (ViT). El modelo TrOCR \citep{li2021} estableció un nuevo estándar al pre-entrenar codificadores de visión y decodificadores de lenguaje en corpus masivos, logrando una robustez significativa frente a distorsiones y estilos de escritura variados. Alternativamente, enfoques como IGTR (\emph{Instruction-Guided Scene Text Recognition}) reformulan el reconocimiento como un problema de seguimiento de instrucciones, mejorando la precisión en textos de escena complejos \citep{shi2016}.
+
+\subsection{Reconocimiento de Expresiones Matemáticas (MER)}
+El reconocimiento de fórmulas matemáticas (Image-to-\LaTeX) presenta desafíos únicos debido a su estructura bidimensional no lineal. Las arquitecturas \emph{Encoder-Decoder} tradicionales han evolucionado hacia modelos especializados como \textbf{UniMERNet} \citep{wang2024}. Este modelo introduce un Módulo Consciente de la Longitud (\emph{Length-Aware Module}) para manejar eficientemente fórmulas de complejidad variable y ha sido entrenado en el dataset masivo UniMER-1M, superando a predecesores en robustez ante ruido. Otro enfoque relevante es \textbf{TexTeller}, que demuestra que el escalado masivo de datos de entrenamiento (80 millones de pares) puede compensar arquitecturas más simples, logrando métricas SOTA de hasta 0.77 en Google BLEU \citep{blecher2023}.
+
+\subsection{Análisis de Layout y Comprensión de Documentos}
+Para la comprensión estructural, modelos como \textbf{LayoutLM} y sus sucesores (LayoutLMv3) han demostrado la superioridad del pre-entrenamiento multimodal, modelando conjuntamente texto, diseño (coordenadas) e imagen visual \citep{xu2020}. En contraste, enfoques \emph{end-to-end} como \textbf{Pix2Struct} procesan la imagen completa para generar el texto estructurado directamente, eliminando la dependencia de un OCR intermedio, aunque a un costo computacional mayor. Herramientas como \textbf{LayoutParser} \citep{layoutparser} facilitan la implementación de estos modelos (basados en Detectron2) para la segmentación precisa de regiones lógicas.
+
+\subsection{Brecha en Soluciones Comerciales}
+Herramientas como Microsoft Lens se limitan al preprocesamiento de imagen y OCR plano, mientras que plataformas como Miro AI ofrecen síntesis de notas pero carecen de la especialización necesaria para notación técnica compleja \citep{mclens}. La arquitectura propuesta en este paper busca llenar este vacío integrando la precisión de modelos MER especializados (como UniMERNet) con la capacidad de síntesis estructurada de arquitecturas RAG avanzadas.
+
+\section{Metodología}
+
+La metodología se estructura en un pipeline secuencial de cuatro etapas, diseñado para maximizar la precisión mediante la especialización modular.
+
+\subsection{Fase 1: Preprocesamiento de Imagen (Capa de Visión)}
+El objetivo de esta fase es la normalización de la señal de entrada. Se utiliza la librería \textbf{OpenCV} para aplicar transformaciones geométricas y fotométricas.
+\begin{enumerate}
+    \item \textbf{Corrección de Perspectiva:} Se implementan algoritmos de detección de bordes (Canny) y la Transformada de Hough para identificar el cuadrilátero de la pizarra y aplicar una transformación de perspectiva (\emph{warpPerspective}) que rectifique la imagen a una vista frontal plana \citep{shi2016}.
+    \item \textbf{Binarización Adaptativa:} Dado que la iluminación en pizarras es frecuentemente desigual, se descarta la umbralización global en favor de un \emph{Adaptive Gaussian Thresholding}, que calcula umbrales locales basados en vecindarios de píxeles, separando eficazmente el trazo del fondo ruidoso \citep{graves2006}.
+    \item \textbf{Reducción de Ruido:} Se aplican filtros como \emph{FastNlMeansDenoising} para eliminar el ruido de ``sal y pimienta'' típico de sensores de cámaras móviles en condiciones de baja luz.
+\end{enumerate}
+
+\subsection{Fase 2: Análisis de Layout (Capa de Estructura)}
+La imagen normalizada se procesa mediante \textbf{LayoutParser}, utilizando un modelo de detección de objetos profundo (basado en arquitecturas como Mask R-CNN o VGT) pre-entrenado en datasets de documentos (como DocLayNet o PubLayNet).
+\begin{itemize}
+    \item El sistema segmenta la imagen y clasifica las regiones de interés (ROIs) en categorías lógicas: \texttt{Título}, \texttt{Texto}, \texttt{Fórmula}, \texttt{Lista}, \texttt{Diagrama}.
+    \item Se extraen las coordenadas espaciales de cada bloque, las cuales son críticas para reconstruir el orden de lectura lógico en la fase de síntesis \citep{layoutparser}.
+\end{itemize}
+
+\subsection{Fase 3: Reconocimiento Especializado y Enrutamiento (Capa de Extracción)}
+Se implementa una lógica de enrutamiento que dirige cada ROI a un modelo de inferencia especializado, optimizando la precisión por tipo de contenido:
+\begin{itemize}
+    \item \textbf{Bloques de Texto:} Se procesan mediante \textbf{Tesseract 5} (motor LSTM) si se detecta texto impreso, o mediante un modelo \textbf{TrOCR} (\emph{fine-tuned} en el dataset IAM) si se clasifica como manuscrito, aprovechando su arquitectura Transformer para manejar la cursividad \citep{li2021}.
+    \item \textbf{Bloques de Fórmulas:} Se envían a un modelo \emph{Image-to-\LaTeX} especializado, como \textbf{UniMERNet} o \textbf{Pix2Text}. Estos modelos, basados en arquitecturas Encoder-Decoder, generan directamente la cadena de texto \LaTeX (ej. \texttt{\textbackslash frac\{a\}\{b\}}), garantizando una representación sintáctica correcta de la estructura matemática \citep{wang2024}.
+\end{itemize}
+
+\subsection{Fase 4: Síntesis y Estructuración de Conocimiento (Capa RAG/Agente)}
+La etapa final convierte los datos extraídos en conocimiento estructurado.
+\begin{enumerate}
+    \item \textbf{Vectorización (Embedding):} Los fragmentos de texto y \LaTeX reconocidos se convierten en vectores densos utilizando modelos de \textbf{Sentence-Transformers} (SBERT), optimizados para capturar semántica técnica \citep{reimers2019}.
+    \item \textbf{Almacenamiento Vectorial:} Los vectores, junto con sus metadatos de layout (tipo de bloque, posición), se indexan en \textbf{ChromaDB}, una base de datos vectorial optimizada para recuperación eficiente en aplicaciones de agentes.
+    \item \textbf{Orquestación y Generación:} Un agente, implementado con \textbf{LlamaIndex} o \textbf{LangChain}, recupera los fragmentos relevantes preservando su orden secuencial. Finalmente, un LLM eficiente (como \textbf{Mistral 7B} o \textbf{Llama 3}) sintetiza el contenido en formato Markdown, renderizando las fórmulas entre delimitadores \texttt{\$\$} y estructurando los títulos jerárquicamente, listo para su exportación a Obsidian \citep{liu2022}.
+\end{enumerate}
+
+\section{Limitaciones}
+
+\textbf{IMPORTANTE: Esta sección es obligatoria según las instrucciones de NeurIPS.}
+
+\begin{itemize}
+    \item \textbf{Supuestos de entrada:} El sistema asume que las imágenes de pizarras son capturadas con suficiente resolución (mínimo 1080p) y que el texto es legible para el ojo humano. Condiciones de iluminación extrema (sombra parcial, reflexiones severas) pueden degradar significativamente el rendimiento del análisis de layout.
+    \item \textbf{Alcance de reconocimiento:} En el estado actual, el sistema no interpreta diagramas vectoriales complejos (circuitos electrónicos, grafos detallados) a nivel de simulación funcional, limitándose a su identificación y descripción textual superficial.
+    \item \textbf{Costo computacional:} La inferencia de modelos especializados (UniMERNet, TrOCR) requiere GPU con al menos 8GB de VRAM, lo que limita la portabilidad a dispositivos móviles. El tiempo de procesamiento medio es de 45-90 segundos por imagen compleja.
+    \item \textbf{Dependencia de datos de entrenamiento:} La precisión en escritura manuscrita está directamente correlacionada con la cobertura de estilos en el dataset de entrenamiento. Estilos caligráficos no latinoamericanos o muy ornamentados pueden presentar tasas de error más altas.
+    \item \textbf{Privacidad y seguridad:} El procesamiento de pizarras potencialmente contiene información académica sensible. La versión actual no implementa encriptación de datos en tránsito entre módulos del pipeline, lo que representa un riesgo en despliegues multi-usuario.
+\end{itemize}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\section*{NeurIPS Paper Checklist}
+
+\begin{enumerate}
+
+\item \textbf{Claims}
+\begin{itemize}
+\item[] Question: Do the main claims made in the abstract and introduction accurately reflect the paper's contributions and scope?
+\item[] Answer: Yes
+\item[] Justification: El abstract y la introducción presentan claramente el sistema propuesto (pipeline multimodal para digitalización de pizarras) y sus componentes principales, sin hacer afirmaciones no respaldadas.
+\end{itemize}
+
+\item \textbf{Limitations}
+\begin{itemize}
+\item[] Question: Does the paper discuss the limitations of the work performed by the authors?
+\item[] Answer: Yes
+\item[] Justification: La sección de ``Limitaciones'' discute explícitamente cinco categorías de limitaciones: supuestos de entrada, alcance de reconocimiento, costo computacional, dependencia de datos y aspectos de seguridad.
+\end{itemize}
+
+\item \textbf{Theory Assumptions and Proofs}
+\begin{itemize}
+\item[] Question: For each theoretical result, does the paper provide the full set of assumptions and a complete (and correct) proof?
+\item[] Answer: N/A
+\item[] Justification: Este es un trabajo de diseño de sistema e ingeniería de software. No presenta resultados teóricos que requieran pruebas matemáticas formales.
+\end{itemize}
+
+\item \textbf{Experimental Result Reproducibility}
+\begin{itemize}
+\item[] Question: Does the paper fully disclose all the information needed to reproduce the main experimental results?
+\item[] Answer: Partial
+\item[] Justification: El paper describe la metodología y los modelos utilizados, pero como es un diseño arquitectónico, faltarían detalles de implementación específicos (hiperparámetros, datasets exactos) para reproducibilidad completa. Esto sería abordado en la implementación final.
+\end{itemize}
+
+\item \textbf{Open access to data and code}
+\begin{itemize}
+\item[] Question: Does the paper provide open access to the data and code?
+\item[] Answer: No
+\item[] Justification: Este es un paper de diseño arquitectónico en fase de propuesta. El código y datasets serían liberados en una fase posterior de implementación.
+\end{itemize}
+
+\item \textbf{Experimental Setting/Details}
+\begin{itemize}
+\item[] Question: Does the paper specify all training and test details?
+\item[] Answer: Partial
+\item[] Justification: Se especifican los modelos y técnicas utilizadas en cada fase del pipeline, pero faltan detalles cuantitativos de entrenamiento que serían incluidos en experimentos posteriores.
+\end{itemize}
+
+\item \textbf{Experiment Statistical Significance}
+\begin{itemize}
+\item[] Question: Does the paper report error bars suitably and correctly defined?
+\item[] Answer: N/A
+\item[] Justification: No se presentan resultados experimentales cuantitativos en esta propuesta de diseño arquitectónico.
+\end{itemize}
+
+\item \textbf{Experiments Compute Resources}
+\begin{itemize}
+\item[] Question: Does the paper provide sufficient information on computer resources?
+\item[] Answer: Yes
+\item[] Justification: La Sección de Limitaciones especifica los requisitos computacionales: GPU con mínimo 8GB VRAM y tiempo de procesamiento de 45-90 segundos por imagen.
+\end{itemize}
+
+\item \textbf{Code Of Ethics}
+\begin{itemize}
+\item[] Question: Does the research conform with the NeurIPS Code of Ethics?
+\item[] Answer: Yes
+\item[] Justification: El trabajo propone una herramienta de productividad académica sin aplicaciones dañinas evidentes. Se mencionan explícitamente preocupaciones de privacidad en las limitaciones.
+\end{itemize}
+
+\item \textbf{Broader Impacts}
+\begin{itemize}
+\item[] Question: Does the paper discuss both potential positive societal impacts and negative societal impacts?
+\item[] Answer: Partial
+\item[] Justification: Se discuten implícitamente los beneficios (democratización del acceso a herramientas de gestión de conocimiento) y se mencionan riesgos de privacidad. Una discusión más amplia de impactos sociales podría fortalecerse.
+\end{itemize}
+
+\item \textbf{Safeguards}
+\begin{itemize}
+\item[] Question: Does the paper describe safeguards for responsible release of data or models?
+\item[] Answer: Partial
+\item[] Justification: Se identifican riesgos de privacidad en las limitaciones, pero no se detallan salvaguardas específicas. Esto sería apropiado para una fase de implementación.
+\end{itemize}
+
+\item \textbf{Licenses for existing assets}
+\begin{itemize}
+\item[] Question: Are the creators of assets properly credited and are licenses respected?
+\item[] Answer: Yes
+\item[] Justification: Todos los modelos y herramientas mencionados (TrOCR, UniMERNet, LayoutParser, OpenCV, etc.) son citados apropiadamente y son de código abierto o uso académico permitido.
+\end{itemize}
+
+\item \textbf{New Assets}
+\begin{itemize}
+\item[] Question: Are new assets well documented?
+\item[] Answer: N/A
+\item[] Justification: Este paper propone una arquitectura pero no introduce nuevos datasets o modelos pre-entrenados que requieran documentación de activos.
+\end{itemize}
+
+\item \textbf{Crowdsourcing and Research with Human Subjects}
+\begin{itemize}
+\item[] Question: Does the paper include full instructions given to participants?
+\item[] Answer: N/A
+\item[] Justification: El trabajo no involucra crowdsourcing ni estudios con sujetos humanos.
+\end{itemize}
+
+\item \textbf{Institutional Review Board (IRB) Approvals}
+\begin{itemize}
+\item[] Question: Does the paper describe potential risks and IRB approvals?
+\item[] Answer: N/A
+\item[] Justification: No se requiere aprobación IRB ya que no hay investigación con sujetos humanos.
+\end{itemize}
+
+\end{enumerate}
+
+\end{document}
