@@ -1,0 +1,15 @@
+
+opencv-python
+numpy
+Pillow
+transformers
+torch
+sentence-transformers
+faiss-cpu
+pytesseract
+layoutparser  # opcional; instalación puede requerir Detectron2 (complejo)
+#detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu113/torch1.10/index.html   instalar cuando tienes solo CPU
+#detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu113/torch1.10/index.html   instalar cuando tienes GPU
+#openai # opcional
+easyocr
+#realesrgan

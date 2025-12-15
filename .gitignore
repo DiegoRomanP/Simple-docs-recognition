@@ -1,0 +1,8 @@
+docs/
+images/
+models/
+output
+venv/
+imagen_preprocesada.jpg
+resultado_detectado.jpg
+__pycache__/
