@@ -18,7 +18,7 @@ El objetivo principal es facilitar la gestión del conocimiento para estudiantes
 * **Integración y Usabilidad**: Diseño de un flujo de trabajo intuitivo para el usuario, desde la captura de la imagen hasta la obtención de la nota estructurada.
 
 ## Estructura del Repositorio
-
+```
 ├── docs/ # Documentación del proyecto (informes, papers, etc.)
 ├── data/ # Conjuntos de datos de ejemplo (imágenes de pizarras, notas manuscritas)
 ├── src/ # Código fuente del proyecto
@@ -36,3 +36,4 @@ El objetivo principal es facilitar la gestión del conocimiento para estudiantes
 ├── README.md # Este archivo
 ├── requirements.txt # Dependencias del proyecto
 └── LICENSE # Licencia del proyecto
+```

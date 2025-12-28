@@ -1,8 +1,14 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+coordenadas_layout/
 docs/
 images/
+markdowns/
 models/
+notas_markdown/
 output
+pdfs/
 venv/
-imagen_preprocesada.jpg
-resultado_detectado.jpg
-__pycache__/

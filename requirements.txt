@@ -1,10 +1,6 @@
-
 opencv-python
 numpy
 Pillow
-transformers
-torch
-sentence-transformers
 faiss-cpu
 pytesseract
 layoutparser  # opcional; instalación puede requerir Detectron2 (complejo)
@@ -13,3 +9,17 @@ layoutparser  # opcional; instalación puede requerir Detectron2 (complejo)
 #openai # opcional
 easyocr
 #realesrgan
+#pip install layoutparser torchvision && pip install "detectron2@git+https://github.com/facebookresearch/detectron2.git@v0.5#egg=detectron2"}
+#agregar esto a la instalacion
+pix2tex[gui]
+#librerias para hacer el procesamiento de imagen a texto
+transformers
+torch
+sentence-transformers
+
+#implementacion para rag
+langchain
+langchain-community chromadb sentence-transformers pypdf pdfp lumber
+ollama
+llama-cpp-python 
+beautifulsoup4

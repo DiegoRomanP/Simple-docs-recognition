@@ -2,7 +2,7 @@ import layoutparser as lp
 import shutil
 import os
 
-list_models={"HJDataset_faster":"lp://HJDataset/faster_rcnn_R_50_FPN_3x/config","HJDataset_mask":"lp://HJDataset/mask_rcnn_R_50_FPN_3x/config","HJDataset_retina":"lp://HJDataset/retinanet_R_50_FPN_3x/config","PubLayNet_faster":"lp://PubLayNet/faster_rcnn_R_50_FPN_3x/config","PubLayNet_mask":"lp://PubLayNet/mask_rcnn_R_50_FPN_3x/config","PubLayNet_mask_X":"lp://PubLayNet/mask_rcnn_X_101_32x8d_FPN_3x/config","PrimaLayout_mask":"lp://PrimaLayout/mask_rcnn_R_50_FPN_3x/config","NewspaperNavigator_faster":"lp://NewspaperNavigator/faster_rcnn_R_50_FPN_3x/config","TableBank_faster":"lp://TableBank/faster_rcnn_R_50_FPN_3x/config","TableBank_faster_X":"lp://TableBank/faster_rcnn_R_101_FPN_3x/config","MFD_faster":"lp://MFD/faster_rcnn_R_50_FPN_3x/config"}
+list_models{"HJDataset_faster":"lp://HJDataset/faster_rcnn_R_50_FPN_3x/config","HJDataset_mask":"lp://HJDataset/mask_rcnn_R_50_FPN_3x/config","HJDataset_retina":"lp://HJDataset/retinanet_R_50_FPN_3x/config","PubLayNet_faster":"lp://PubLayNet/faster_rcnn_R_50_FPN_3x/config","PubLayNet_mask":"lp://PubLayNet/mask_rcnn_R_50_FPN_3x/config","PubLayNet_mask_X":"lp://PubLayNet/mask_rcnn_X_101_32x8d_FPN_3x/config","PrimaLayout_mask":"lp://PrimaLayout/mask_rcnn_R_50_FPN_3x/config","NewspaperNavigator_faster":"lp://NewspaperNavigator/faster_rcnn_R_50_FPN_3x/config","TableBank_faster":"lp://TableBank/faster_rcnn_R_50_FPN_3x/config","TableBank_faster_X":"lp://TableBank/faster_rcnn_R_101_FPN_3x/config","MFD_faster":"lp://MFD/faster_rcnn_R_50_FPN_3x/config"}
 
 carpeta_descarga="/home/diego/.torch/iopath_cache/s"#carpeta usual donde se descargan los archivos
 reiniciar_carpeta_torch="/home/diego/.torch/"
@@ -11,7 +11,10 @@ nombre_descarga_modelo="model_final.pth?dl=1"#nombre usual que se le asigna al d
 nombre_descarga_config="config.yml?dl=1"#nombre usual que se asigna al descargar el archivo config
 carpeta_destino="/home/diego/Documentos/proyecto_pam/models"
 for model in list_models:
-    modelo=lp.Detectron2LayoutModel(config_path=list_models[model])
+    try:
+        modelo=lp.Detectron2LayoutModel(config_path=list_models[model])
+    except:
+        print("Error al descargar el modelo")
     if os.path.exists(carpeta_descarga):
         lista=os.listdir(carpeta_descarga)
         for carpeta in lista:
