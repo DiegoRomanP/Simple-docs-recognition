@@ -1,8 +1,8 @@
 import os
-from layout_detector import LayoutDetector
-from bounding_box_processor import BoundingBoxProcessor
-from ocr_processor import OCRProcessor
-from image_preprocessor import ImagePreprocessor
+from .layout_detector import LayoutDetector
+from .bounding_box_processor import BoundingBoxProcessor
+from .ocr_processor import OCRProcessor
+from .image_preprocessor import ImagePreprocessor
 
 class DocumentLayoutPipeline:
     def __init__(self, layout_config, ocr_languages=None):

@@ -2,7 +2,7 @@ import json
 import os
 import layoutparser as lp
 from PIL import Image
-from layout_config import LayoutConfig
+from .layout_config import LayoutConfig
 
 class LayoutDetector:
     def __init__(self, config: LayoutConfig):

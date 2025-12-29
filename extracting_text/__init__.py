@@ -1,4 +1,4 @@
-from .contentextractor import ContentExtractor
+from .ContentExtractor import ContentExtractor
 
 __all__ = [
     'ContentExtractor'
