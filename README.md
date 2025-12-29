@@ -2,53 +2,83 @@
 
 ## Descripción del Proyecto
 
-Este proyecto se enfoca en la **digitalización y estructuración inteligente de notas manuscritas**, transformando el contenido de pizarras y cuadernos en formatos digitales organizados y editables. Utilizando una combinación de tecnologías de Reconocimiento Óptico de Caracteres (OCR), Reconocimiento de Texto Manuscrito (HTR) y Agentes de Inteligencia Artificial (IA) basados en Large Language Models (LLMs), buscamos crear un sistema que no solo transcriba el texto, sino que también comprenda su contexto, lo estructure y lo integre en bases de conocimiento.
+Este proyecto se enfoca en la **digitalización y estructuración inteligente de notas manuscritas**, transformando el contenido de pizarras y cuadernos en formatos digitales organizados y editables. 
 
-El objetivo principal es facilitar la gestión del conocimiento para estudiantes e investigadores, permitiendo una interacción más eficiente con sus apuntes y materiales de estudio.
+El sistema implementa un pipeline completo que combina:
+1. **Visión Computacional**: Detecta la estructura visual de la nota (Títulos, Texto, Figuras) usando modelos de *Layout Parsing*.
+2. **HTR & OCR Híbrido**: Transcribe texto manuscrito con **TrOCR** y convierte fórmulas matemáticas complejas directamente a código **LaTeX**.
+3. **RAG (Retrieval-Augmented Generation)**: Indexa el contenido generado en una base de datos vectorial para permitir consultas inteligentes mediante un Chatbot local.
+
+El objetivo principal es facilitar la gestión del conocimiento para estudiantes e investigadores, permitiendo "chatear" con sus apuntes de clase.
 
 ## Características Principales
 
-* **Digitalización Avanzada**: Conversión de imágenes de texto manuscrito (pizarras, cuadernos) a texto digital.
-* **Comparación OCR vs. HTR**: Implementación y análisis de diferentes enfoques para el reconocimiento de texto, destacando las ventajas del HTR para la escritura a mano.
-* **Agentes de IA para Estructuración del Conocimiento**: Utilización de LLMs para:
-  * **Tokenización y Embeddings**: Procesamiento del texto para su comprensión semántica.
-  * **Modelos Secuenciales (RNNs, Transformers)**: Aplicación de arquitecturas avanzadas para el análisis contextual.
-  * **Generación Aumentada por Recuperación (RAG)**: Mejora de la precisión y relevancia de la información generada por los LLMs mediante la consulta de bases de conocimiento externas.
-  * **Estructuración Automática**: Transformación del texto plano en formatos estructurados como Markdown o LaTeX, identificando secciones, títulos, listas y conceptos clave.
-* **Integración y Usabilidad**: Diseño de un flujo de trabajo intuitivo para el usuario, desde la captura de la imagen hasta la obtención de la nota estructurada.
+* **Detección de Layout**: Segmentación inteligente de la imagen usando modelos `Detectron2` (PubLayNet) para separar texto, títulos y gráficos.
+* **OCR Especializado**:
+  * **TrOCR (Microsoft)**: Para texto manuscrito general.
+  * **LaTeX-OCR (Pix2Tex)**: Para ecuaciones matemáticas complejas.
+* **Preprocesamiento Adaptativo**: Algoritmos de visión (CLAHE) para corregir iluminación y contraste en fotos de pizarras reales.
+* **Sistema RAG Local**:
+  * **Indexación**: Almacenamiento persistente en `ChromaDB`.
+  * **Chat Interactivo**: Interfaz de preguntas y respuestas potenciada por **Ollama (Mistral/Llama3)**.
+* **Estructuración Automática**: Generación de archivos Markdown (`.md`) limpios y organizados automáticamente.
 
-## Forma de ejercutar el código:
-Primero debes instalar ollama y descargar el modelo mistral:
-```
-curl -fsSL https://ollama.com/install.sh | sh
-ollama pull mistral
-```
+## Requisitos Previos (Ollama)
 
-Luego instala las dependencias y ejecuta el código:
-```
+Para la fase de chat y generación de respuestas, es necesario tener instalado Ollama corriendo localmente.
+
+1. **Instalar Ollama:**
+   ```bash
+   curl -fsSL [https://ollama.com/install.sh](https://ollama.com/install.sh) | sh
+   ```
+   
+2. **Instalar modelos:**
+   ```bash
+   ollama pull mistral
+   ```
+### Crear entorno virtual y ejecutar el código:
+```bash
+python -m venv venv
+source venv/bin/activate
 pip install --upgrade pip setuptools wheel
 pip install torch torchvision torchaudio
+
+# Instalar dependencias del proyecto
 pip install -r requirements.txt
+
+# Nota para Linux: Si Detectron2 falla, usar:
+pip install 'git+[https://github.com/facebookresearch/detectron2.git](https://github.com/facebookresearch/detectron2.git)'
+```
+#### Configuracion de modelos:
+Asegúrate de que los pesos de los modelos de detección (model_final.pth y config.yml) estén ubicados en la carpeta models/PubLayNet_faster/.1. Descargar modelos de PubLayNet y TrOCR:
+con el archivo 
+descargar_modelos.py 
+**ojo solo funciona en linux**
+### Ejecutar el pipeline:
+```bash
 python main.py
 ```
 
-## Estructura del Repositorio
-```
-├── docs/ # Documentación del proyecto (informes, papers, etc.)
-├── data/ # Conjuntos de datos de ejemplo (imágenes de pizarras, notas manuscritas)
-├── src/ # Código fuente del proyecto
-│ ├── ocr_module/ # Módulo para el reconocimiento OCR
-│ ├── htr_module/ # Módulo para el reconocimiento HTR
-│ ├── llm_agent/ # Módulo para los agentes IA y LLMs
-│ │ ├── rag_system/ # Implementación del sistema RAG
-│ │ └── knowledge_structuring/ # Lógica para la estructuración del conocimiento
-│ ├── utils/ # Utilidades y funciones auxiliares
-│ └── main.py # Script principal de ejecución
-├── notebooks/ # Jupyter notebooks para experimentación y análisis
-├── models/ # Modelos pre-entrenados o entrenados localmente
-├── tests/ # Pruebas unitarias e integración
-├── .gitignore # Archivos y directorios a ignorar por Git
-├── README.md # Este archivo
-├── requirements.txt # Dependencias del proyecto
-└── LICENSE # Licencia del proyecto
+## Estructura del proyecto
+```plaintext
+├── images/                  # Carpeta de ENTRADA (coloca aquí tus fotos)
+├── images_processed/        # Carpeta generada con recortes y visualizaciones
+├── markdowns/               # Carpeta de SALIDA (notas digitalizadas .md)
+├── models/                  # Pesos de modelos (Detectron2, etc.)
+├── chroma_db/               # Base de datos vectorial persistente (RAG)
+├── src/                     # Código fuente modular
+│   ├── preproccesing/       # Módulo de Layout y Visión
+│   │   ├── layout_detector.py
+│   │   ├── image_preprocessor.py
+│   │   └── ...
+│   ├── extracting_text/     # Módulo de OCR y HTR
+│   │   ├── ContentExtractor.py
+│   │   └── ...
+│   └── rag_implementation/  # Módulo de Inteligencia Artificial (RAG)
+│       ├── ultra_fast_markdown_rag.py
+│       └── ...
+├── main_pipeline.py         # SCRIPT PRINCIPAL (Orquestador)
+├── requirements.txt         # Dependencias del proyecto
+├── README.md                # Este archivo
+└── LICENSE                  # Licencia del proyecto
 ```
