@@ -34,4 +34,4 @@ faiss-cpu
 pypdf
 pdfplumber
 
-ultralytics
+pix2tex

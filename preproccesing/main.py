@@ -1,13 +1,10 @@
 """
 Script principal para ejecutar el pipeline de procesamiento de documentos.
-
-Este script demuestra cómo usar las diferentes clases del paquete preproccesing
-para procesar documentos, detectar layouts y realizar OCR.
 """
 
 from layout_config import LayoutConfig
 from document_layout_pipeline import DocumentLayoutPipeline
-
+import os
 
 def main():
     """Función principal de ejemplo para procesar documentos"""
@@ -20,17 +17,20 @@ def main():
     # 1. Configurar el modelo
     # ========================================
     print("\n[1/3] Configurando modelo...")
-
+    
+    # Asegúrate de que estas rutas sean correctas en tu PC
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    # Ajusta esta ruta según donde tengas tus modelos realmente
+    MODEL_DIR = "/home/diego/Documentos/proyecto_pam/models/PubLayNet_faster"
+    
     config = LayoutConfig(
-        config_path="/home/diego/Documentos/proyecto_pam/models/PubLayNet_faster/config.yml",
-        model_path="/home/diego/Documentos/proyecto_pam/models/PubLayNet_faster/model_final.pth",
+        config_path=os.path.join(MODEL_DIR, "config.yml"),
+        model_path=os.path.join(MODEL_DIR, "model_final.pth"),
         label_map_name="PubLayNet",
         score_threshold=0.8,
     )
 
-    print(f"✓ Modelo configurado: {config.model_path}")
-    print(f"✓ Umbral de confianza: {config.score_threshold}")
-    print(f"✓ Etiquetas: {list(config.label_map.values())}")
+    print(f"✓ Modelo configurado")
 
     # ========================================
     # 2. Crear pipeline
@@ -48,12 +48,15 @@ def main():
 
     image_path = "/home/diego/Documentos/proyecto_pam/images/imagen1.jpeg"
 
+    if not os.path.exists(image_path):
+        print(f"❌ Error: No se encuentra la imagen en {image_path}")
+        return
+
+    # --- CORRECCIÓN AQUÍ ---
+    # Llamada simplificada según tu nueva clase DocumentLayoutPipeline
     results = pipeline.process_document(
         image_path=image_path,
-        preprocess=True,
-        detect_layout_flag=True,
-        crop_boxes=True,
-        output_coords="coordenadas.json",
+        preprocess=True
     )
 
     # ========================================
@@ -63,14 +66,18 @@ def main():
     print("Resultados del Procesamiento")
     print("=" * 60)
 
+    # Verificamos las llaves que devuelve tu nuevo pipeline
     if "preprocessed_image" in results:
         print(f"\n✓ Imagen preprocesada: {results['preprocessed_image']}")
 
     if "coords_file" in results:
         print(f"✓ Coordenadas guardadas en: {results['coords_file']}")
+        
+    if "viz_file" in results:
+        print(f"✓ Visualización guardada en: {results['viz_file']}")
 
-    if "cropped_boxes" in results:
-        print("✓ Bounding boxes recortadas exitosamente")
+    if "crops" in results:
+        print(f"✓ Se generaron {len(results['crops'])} recortes en 'images_processed/'")
 
     if "layout" in results:
         print(f"✓ Elementos detectados: {len(results['layout'])}")
@@ -81,56 +88,5 @@ def main():
 
     return results
 
-
-def example_custom_workflow():
-    """
-    Ejemplo de flujo de trabajo personalizado usando componentes individuales
-    """
-    from layout_config import LayoutConfig
-    from layout_detector import LayoutDetector
-    from image_preprocessor import ImagePreprocessor
-    from bounding_box_processor import BoundingBoxProcessor
-
-    print("\n" + "=" * 60)
-    print("Ejemplo de Flujo de Trabajo Personalizado")
-    print("=" * 60)
-
-    # Configurar modelo
-    config = LayoutConfig(
-        config_path="../models/NewspaperNavigator_faster/config.yml",
-        model_path="../models/NewspaperNavigator_faster/model_final.pth",
-        label_map_name="PubLayNet",
-        score_threshold=0.75,
-    )
-
-    # Crear detector
-    detector = LayoutDetector(config)
-
-    # Preprocesar imagen
-    preprocessor = ImagePreprocessor()
-    image_path = "../images/imagen1.jpeg"
-    preprocessed_path = preprocessor.preprocesar_global(
-        image_path, "custom_preprocessed.jpg"
-    )
-
-    print(f"✓ Imagen preprocesada: {preprocessed_path}")
-
-    # Detectar layout
-    layout = detector.detect_layout(preprocessed_path, "custom_coords.json")
-
-    print(f"✓ Layout detectado con {len(layout)} elementos")
-
-    # Recortar bounding boxes
-    bbox_processor = BoundingBoxProcessor()
-    bbox_processor.recortar_bounding_boxes(preprocessed_path, "custom_coords.json")
-
-    print("✓ Bounding boxes recortadas")
-    print("=" * 60)
-
-
 if __name__ == "__main__":
-    # Ejecutar pipeline principal
-    results = main()
-
-    # Descomentar para ejecutar el ejemplo de flujo personalizado
-    # example_custom_workflow()
+    main()

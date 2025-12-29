@@ -3,12 +3,11 @@ __pycache__/
 *$py.class
 *.so
 .Python
+chroma_db/
 coordenadas_layout/
 docs/
 images/
+images_processed/
 markdowns/
 models/
-notas_markdown/
-output
-pdfs/
 venv/

@@ -5,6 +5,7 @@ Módulo para preprocesar imágenes antes de la detección de layout.
 import cv2
 import numpy as np
 from PIL import Image
+import os
 
 
 class ImagePreprocessor:
@@ -12,78 +13,58 @@ class ImagePreprocessor:
 
     """Las funciones preprocesar_pizarra_para_layout y funcion_contraste son para etapa de detección"""
 
-    @staticmethod
-    def preprocesar_pizarra_para_layout(image_path_or_array, debug_save=False): 
-        """ Preprocesa una imagen de pizarra usando operación Top-Hat Args:
-            image_path_or_array: Ruta de imagen o array numpy
-            debug_save: Si guardar imágenes intermedias para debug
+    def ensure_dir(self, file_path):
+        directory = os.path.dirname(file_path)
+        if directory and not os.path.exists(directory):
+            os.makedirs(directory)
 
+    def preprocesar_pizarra_para_layout(self, image_path, output_path=None): 
+        """ 
+        Preprocesa una imagen de pizarra de forma SUAVE para detección de layout.
+        Usa solo escala de grises y CLAHE para corregir iluminación.
+        NO binariza.
+        
         Returns:
-            Imagen PIL procesada
+            str: Ruta de la imagen procesada guardada en disco.
         """
         # 1. Cargar imagen
-        if isinstance(image_path_or_array, str):
-            img = cv2.imread(image_path_or_array)
-            if img is None:
-                raise ValueError(f"No se pudo cargar la imagen: {image_path_or_array}")
-        else:
-            img = image_path_or_array
+        img = cv2.imread(image_path)
+        if img is None:
+            raise ValueError(f"No se pudo cargar la imagen: {image_path}")
 
         # 2. Convertir a Escala de Grises
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        if debug_save:
-            cv2.imwrite("debug_1_gray.jpg", gray)
 
-        # 3. Detección y Corrección de Polaridad (Pizarra Negra vs Blanca)
-        mean_intensity = np.mean(gray)
-        if mean_intensity < 127:
-            gray_for_processing = cv2.bitwise_not(gray)
-            print("Detectada pizarra oscura. Invirtiendo colores.")
+        # 3. Mejora de Contraste Suave con CLAHE (Adaptive Histogram Equalization)
+        # Esto nivela el brillo sin ser destructivo.
+        # clipLimit=2.0 es conservador. tileGridSize=(8,8) es estándar.
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        enhanced_gray = clahe.apply(gray)
+
+        # IMPORTANTE: Los modelos de detección (LayoutParser/Detectron2) a menudo esperan
+        # una imagen de 3 canales (RGB/BGR), aunque internamente usen grises.
+        # Convertimos el resultado gris de vuelta a BGR para evitar errores de forma.
+        final_img = cv2.cvtColor(enhanced_gray, cv2.COLOR_GRAY2BGR)
+        
+        # NOTA: Hemos eliminado la binarización (threshold) y la inversión de colores.
+        # El modelo de layout debería ser capaz de manejar la imagen en escala de grises optimizada.
+
+        # 4. Guardar imagen
+        if output_path:
+            self.ensure_dir(output_path)
+            cv2.imwrite(output_path, final_img)
+            return output_path
         else:
-            gray_for_processing = gray
-            print("Detectada pizarra clara.")
+            temp_path = "temp_processed.jpg"
+            cv2.imwrite(temp_path, final_img)
+            return temp_path
 
-        if debug_save:
-            cv2.imwrite("debug_2_inverted.jpg", gray_for_processing)
-
-        # --- NÚCLEO DEL PROCESAMIENTO: Operación Top-Hat ---
-
-        # 4. Definir el "Kernel" (Elemento Estructurante)
-        kernel_size = (10, 10)
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, kernel_size)
-
-        # 5. Aplicar Morphological Top-Hat
-        tophat = cv2.morphologyEx(gray_for_processing, cv2.MORPH_TOPHAT, kernel)
-
-        if debug_save:
-            cv2.imwrite("debug_3_tophat_raw.jpg", tophat)
-
-        # 6. Normalización / Estiramiento de Contraste
-        normalized = cv2.normalize(tophat, None, 0, 255, norm_type=cv2.NORM_MINMAX)
-
-        if debug_save:
-            cv2.imwrite("debug_4_normalized.jpg", normalized)
-
-        # 7. Binarización (Umbralización de Otsu)
-        _, binary = cv2.threshold(
-            normalized, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU
-        )
-
-        # 8. Inversión Final
-        final_output_cv = cv2.bitwise_not(binary)
-
-        if debug_save:
-            cv2.imwrite("debug_5_final.jpg", final_output_cv)
-
-        final_pil = Image.fromarray(final_output_cv)
-
-        return final_pil
-
+            
     @staticmethod
     def funcion_contraste(image_path):
         """
         Aplica mejora de contraste usando espacio de color YCrCb
-        Esto es realce de imagen, mantiene los colores y hcae el texto resaltante
+        Esto es realce de imagen, mantiene los colores y hace el texto resaltante
 
         Args:
             image_path: Ruta de la imagen

@@ -1,97 +1,67 @@
-"""
-Módulo que orquesta el pipeline completo de procesamiento de documentos.
-"""
-
-from layout_config import LayoutConfig
+import os
 from layout_detector import LayoutDetector
 from bounding_box_processor import BoundingBoxProcessor
 from ocr_processor import OCRProcessor
 from image_preprocessor import ImagePreprocessor
 
-
 class DocumentLayoutPipeline:
-    """Clase principal que orquesta el pipeline completo de procesamiento de documentos"""
-
-    def __init__(self, layout_config: LayoutConfig, ocr_languages=None):
-        """
-        Inicializa el pipeline de procesamiento
-
-        Args:
-            layout_config: Configuración del modelo de layout
-            ocr_languages: Idiomas para OCR
-        """
+    def __init__(self, layout_config, ocr_languages=None):
         self.detector = LayoutDetector(layout_config)
         self.bbox_processor = BoundingBoxProcessor()
         self.ocr_processor = OCRProcessor(languages=ocr_languages, use_tesseract=True)
         self.preprocessor = ImagePreprocessor()
+        
+        self.dir_images = "images_processed"
+        self.dir_coords = "coordenadas_layout"
+        
+        os.makedirs(self.dir_images, exist_ok=True)
+        os.makedirs(self.dir_coords, exist_ok=True)
 
-    def process_document(
-        self,
-        image_path,
-        preprocess=True,
-        detect_layout_flag=True,
-        crop_boxes=True,
-        output_coords="coordenadas.json",
-    ):
-        """
-        Procesa un documento completo
-
-        Args:
-            image_path: Ruta de la imagen
-            preprocess: Si aplicar preprocesamiento
-            detect_layout_flag: Si detectar layout
-            crop_boxes: Si recortar las bounding boxes
-            output_coords: Archivo de salida para coordenadas
-
-        Returns:
-            Dict con rutas de archivos generados
-        """ 
+    def process_document(self, image_path, preprocess=True):
         results = {}
+        filename = os.path.basename(image_path)
+        name_no_ext = os.path.splitext(filename)[0]
 
-        # Preprocesamiento
+        # 1. Preprocesamiento (Solo para ayudar al detector)
         if preprocess:
-            print("Preprocesando imagen...")
-            preprocessed_path = self.preprocessor.preprocesar_pizarra_para_layout(
-                image_path
+            print("Preprocesando imagen para detección...")
+            processed_filename = f"processed_{filename}"
+            processed_path = os.path.join(self.dir_images, processed_filename)
+            
+            # Esta imagen se usará SOLO para detectar el layout
+            image_for_detection_path = self.preprocessor.preprocesar_pizarra_para_layout(
+                image_path, output_path=processed_path
             )
-            results["preprocessed_image"] = preprocessed_path
-            image_to_process = preprocessed_path
+            results["preprocessed_image"] = image_for_detection_path
         else:
-            image_to_process = image_path
+            image_for_detection_path = image_path
 
-        # Detección de layout
-        if detect_layout_flag:
-            print("Detectando layout...")
-            #si es que se quiere procesar la imagen original cambiar image_to_process por image_path
-            layout = self.detector.detect_layout(image_to_process, output_coords)
-            results["layout"] = layout
-            results["coords_file"] = output_coords
+        # 2. Detección de Layout
+        print("Detectando layout...")
+        json_filename = f"{name_no_ext}_coords.json"
+        json_path = os.path.join(self.dir_coords, json_filename)
+        viz_filename = f"viz_{filename}"
+        viz_path = os.path.join(self.dir_images, viz_filename)
 
-        # Recorte de bounding boxes
-        if crop_boxes and detect_layout_flag:
-            print("Recortando bounding boxes...")
-            self.bbox_processor.recortar_bounding_boxes(image_to_process, output_coords)
-            results["cropped_boxes"] = True
+        # Usamos la imagen PROCESADA (o la original si preprocess=False) para detectar
+        layout = self.detector.detect_layout(
+            image_for_detection_path, 
+            output_json_path=json_path,
+            output_viz_path=viz_path
+        )
+        results["layout"] = layout
+        results["coords_file"] = json_path
+        results["viz_file"] = viz_path
 
-        return results
-
-    def detect_text_in_crops(self, crop_filenames):
-        """
-        Detecta texto en una lista de imágenes recortadas
-
-        Args:
-            crop_filenames: Lista de nombres de archivos
-
-        Returns:
-            Dict con resultados por imagen
-        """
-        results = {}
-
-        for filename in crop_filenames:
-            result = self.ocr_processor.detectar_texto(filename)
-            results[filename] = {"has_text": len(result) > 0, "ocr_result": result}
-
-            if results[filename]["has_text"]:
-                print(f"Imagen {filename} tiene texto detectado")
+        # 3. Recorte
+        print("Recortando bounding boxes de la imagen ORIGINAL...")
+        # --- CORRECCIÓN CRÍTICA AQUÍ ---
+        # Usamos 'image_path' (la ORIGINAL) en lugar de 'image_for_detection_path'
+        crops = self.bbox_processor.recortar_bounding_boxes(
+            image_path,  # <--- CAMBIO IMPORTANTE
+            json_path,
+            self.dir_images
+        )
+        results["crops"] = crops
 
         return results

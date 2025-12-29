@@ -17,6 +17,21 @@ El objetivo principal es facilitar la gestión del conocimiento para estudiantes
   * **Estructuración Automática**: Transformación del texto plano en formatos estructurados como Markdown o LaTeX, identificando secciones, títulos, listas y conceptos clave.
 * **Integración y Usabilidad**: Diseño de un flujo de trabajo intuitivo para el usuario, desde la captura de la imagen hasta la obtención de la nota estructurada.
 
+## Forma de ejercutar el código:
+Primero debes instalar ollama y descargar el modelo mistral:
+```
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull mistral
+```
+
+Luego instala las dependencias y ejecuta el código:
+```
+pip install --upgrade pip setuptools wheel
+pip install torch torchvision torchaudio
+pip install -r requirements.txt
+python main.py
+```
+
 ## Estructura del Repositorio
 ```
 ├── docs/ # Documentación del proyecto (informes, papers, etc.)

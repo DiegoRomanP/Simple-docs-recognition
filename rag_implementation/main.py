@@ -11,22 +11,25 @@ def test_markdown_rag():
     print("🔷 PRUEBA: RAG para Markdown")
     print("="*60)
     
-    # IMPORTANTE: Cambia esto por una ruta real en tu PC
-    markdown_file = "README.md"  # Usamos el README como ejemplo
+    markdown_file = "README.md"
     
     if not os.path.exists(markdown_file):
-        print(f"⚠️  Crea un archivo '{markdown_file}' para probar esta sección.")
+        print(f"⚠️  Crea '{markdown_file}' para probar.")
         return
 
     md_rag = UltraFastMarkdownRAG(model_size="small")
     md_rag.index_markdown(markdown_file)
     
-    preguntas = ["¿De qué trata este proyecto?", "Resumen"]
+    preguntas = ["¿De qué trata este proyecto?", "Resumen de la estructura"]
+    
     for p in preguntas:
         print(f"\n📝 Pregunta: {p}")
-        res = md_rag.query(p, k=2)
-        for r in res:
-            print(f"  > {r['header']}: {r['content'][:100]}...")
+        
+        # AHORA LLAMAMOS A LA FUNCIÓN QUE GENERA LA RESPUESTA
+        respuesta = md_rag.answer_question(p, model_name="mistral") # O llama3
+        
+        print("\n🤖 Respuesta:")
+        print(respuesta)
 
 def test_pdf_rag():
     print("\n" + "="*60)
@@ -34,7 +37,7 @@ def test_pdf_rag():
     print("="*60)
     
     # IMPORTANTE: Cambia esto por una ruta real
-    pdf_file = "docs/tu_documento.pdf"
+    pdf_file = "docs/prueba.pdf"
     
     if not os.path.exists(pdf_file):
         print(f"⚠️  Coloca un PDF en '{pdf_file}' para probar esta sección.")
@@ -45,4 +48,4 @@ def test_pdf_rag():
 
 if __name__ == "__main__":
     test_markdown_rag()
-    # test_pdf_rag()
+    test_pdf_rag()
