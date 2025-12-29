@@ -1,25 +1,37 @@
+# --- Núcleo Matemático y Visión ---
+numpy>=1.26.0
 opencv-python
-numpy
 Pillow
-faiss-cpu
-pytesseract
-layoutparser  # opcional; instalación puede requerir Detectron2 (complejo)
-#detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu113/torch1.10/index.html   instalar cuando tienes solo CPU
-#detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu113/torch1.10/index.html   instalar cuando tienes GPU
-#openai # opcional
-easyocr
-#realesrgan
-#pip install layoutparser torchvision && pip install "detectron2@git+https://github.com/facebookresearch/detectron2.git@v0.5#egg=detectron2"}
-#agregar esto a la instalacion
-pix2tex[gui]
-#librerias para hacer el procesamiento de imagen a texto
-transformers
-torch
-sentence-transformers
-
-#implementacion para rag
-langchain
-langchain-community chromadb sentence-transformers pypdf pdfp lumber
-ollama
-llama-cpp-python 
 beautifulsoup4
+
+# --- Deep Learning Base ---
+# Torch primero para evitar que otros paquetes traigan versiones CPU
+torch>=2.2.0
+torchvision
+
+# --- OCR y Layout ---
+paddlepaddle
+paddleocr
+pytesseract
+easyocr
+layoutparser
+# 'detectron2' se instala aparte, no poner aquí para evitar errores
+
+# --- NLP y LLMs ---
+transformers>=4.36.0
+sentencepiece>=0.1.99
+sentence-transformers
+ollama
+llama-cpp-python
+
+# --- RAG y Vectores ---
+langchain<0.2.0
+langchain-community<0.2.0
+chromadb
+faiss-cpu
+
+# --- Procesamiento de PDF ---
+pypdf
+pdfplumber
+
+ultralytics
