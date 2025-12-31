@@ -241,7 +241,8 @@ if __name__ == "__main__":
     
     # NOMBRE DE LA IMAGEN (Debe estar dentro de la carpeta 'images')
     # Cambia esto por el nombre del archivo que quieras probar
-    IMAGEN_OBJETIVO = "imagen1.jpeg" 
+    
+    IMAGEN_OBJETIVO = input("Ingrese el nombre de la imagen: ") 
 
     try:
         pipeline = FullStackPipeline(use_gpu=USAR_GPU)

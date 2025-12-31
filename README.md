@@ -42,17 +42,37 @@ python -m venv venv
 source venv/bin/activate
 pip install --upgrade pip setuptools wheel
 pip install torch torchvision torchaudio
+
 pip install markdown
 # Instalar dependencias del proyecto
 pip install -r requirements.txt 
-pip install 'git+https://github.com/facebookresearch/detectron2.git'
+pip install 'git+https://github.com/facebookresearch/detectron2.git' --no-build-isolation
 
-#si aún no se detecta detectron2 instalar lo siguiente
+```
+
+### Si aún no se detecta detectron2 instalar lo siguiente:
+```bash
 pip install torch torchvision
 pip install "layoutparser[detectron2]"
 pip install 'git+[https://github.com/facebookresearch/detectron2.git](https://github.com/facebookresearch/detectron2.git)'
 ```
+### Descargar modelos:
+No se podrá ejecutar el programa sin descargar los modelos.
+```bash
+python descargar_modelos.py
+```
+### Tener en cuenta antes de ejecutar el pipeline:
+El programa solo leera las imagenes que esten en la carpeta images/ 
+por lo tanto es importante crear una carpea con el nombre "images" en la carpeta raiz del proyecto.
+Puedes hacerlo con el siguiente comando:
+```bash
+mkdir images
+```
+Y luego coloca tus imagenes en la carpeta images/.
+
+
 #### Configuracion de modelos:
+
 Asegúrate de que los pesos de los modelos de detección (model_final.pth y config.yml) estén ubicados en la carpeta models/PubLayNet_faster/.1. Descargar modelos de PubLayNet y TrOCR:
 con el archivo 
 descargar_modelos.py 
@@ -61,6 +81,20 @@ descargar_modelos.py
 ```bash
 python main.py
 ```
+### Aspectos modificables:
+Si es que al momento de ejecutar el pipeline los resultados no son los esperados, puedes modificar los valores de los parametros en el archivo main.py
+Como el modelo de procesamiento en la linea 92 y 93:
+Antes:
+```python
+config_path = os.path.join(MODELS_DIR, "PubLayNet_faster", "config.yml")
+model_path = os.path.join(MODELS_DIR, "PubLayNet_faster", "model_final.pth")
+```
+Despues:
+```python
+config_path = os.path.join(MODELS_DIR, "HJDataset_faster", "config.yml")
+model_path = os.path.join(MODELS_DIR, "HJDataset_faster", "model_final.pth")
+```
+los modelos se encuentran en la carpeta models/H
 
 ## Estructura del proyecto
 ```plaintext
