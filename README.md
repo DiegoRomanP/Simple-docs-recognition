@@ -38,6 +38,7 @@ Para la fase de chat y generación de respuestas, es necesario tener instalado O
    ```
 ### Crear entorno virtual y ejecutar el código:
 ```bash
+cd Simple-docs-recognition
 python -m venv venv
 source venv/bin/activate
 pip install --upgrade pip setuptools wheel
