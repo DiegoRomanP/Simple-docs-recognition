@@ -35,3 +35,5 @@ pypdf
 pdfplumber
 
 pix2tex
+markdown
+gdown

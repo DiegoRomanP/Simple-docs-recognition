@@ -1,42 +1,57 @@
-import layoutparser as lp
-import shutil
 import os
+import zipfile
+import gdown
 
-list_models= {"HJDataset_faster":"lp://HJDataset/faster_rcnn_R_50_FPN_3x/config","HJDataset_mask":"lp://HJDataset/mask_rcnn_R_50_FPN_3x/config","HJDataset_retina":"lp://HJDataset/retinanet_R_50_FPN_3x/config","PubLayNet_faster":"lp://PubLayNet/faster_rcnn_R_50_FPN_3x/config","PubLayNet_mask":"lp://PubLayNet/mask_rcnn_R_50_FPN_3x/config","PubLayNet_mask_X":"lp://PubLayNet/mask_rcnn_X_101_32x8d_FPN_3x/config","PrimaLayout_mask":"lp://PrimaLayout/mask_rcnn_R_50_FPN_3x/config","NewspaperNavigator_faster":"lp://NewspaperNavigator/faster_rcnn_R_50_FPN_3x/config","TableBank_faster":"lp://TableBank/faster_rcnn_R_50_FPN_3x/config","TableBank_faster_X":"lp://TableBank/faster_rcnn_R_101_FPN_3x/config","MFD_faster":"lp://MFD/faster_rcnn_R_50_FPN_3x/config"}
+# --- CONFIGURACIÓN ---
+# PEGA AQUÍ EL ID DE TU ARCHIVO EN GOOGLE DRIVE
+DRIVE_FILE_ID = "1DD-D1SEPH2tG8j_QmwB3N_kqhDbwNetn"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODELS_DIR = os.path.join(BASE_DIR, "models")
+ZIP_NAME = "models.zip"
 
-carpeta_descarga="/home/diego/.torch/iopath_cache/s"#carpeta usual donde se descargan los archivos
-reiniciar_carpeta_torch="/home/diego/.torch/"
-shutil.rmtree(reiniciar_carpeta_torch)
-nombre_descarga_modelo="model_final.pth?dl=1"#nombre usual que se le asigna al descargar el archivo model
-nombre_descarga_config="config.yml?dl=1"#nombre usual que se asigna al descargar el archivo config
-carpeta_destino="/home/diego/Documentos/proyecto_pam/models"
-for model in list_models:
+
+def setup():
+    print("=" * 60)
+    print("📥 DESCARGANDO MODELOS DESDE GOOGLE DRIVE")
+    print("=" * 60)
+
+    # 1. Descargar el ZIP usando gdown (Maneja la seguridad de Google Drive automáticamente)
+    output_zip = os.path.join(BASE_DIR, ZIP_NAME)
+
+    # URL de descarga directa
+    url = f"https://drive.google.com/uc?id={DRIVE_FILE_ID}"
+
+    print(f"Descargando {ZIP_NAME}...")
     try:
-        modelo=lp.Detectron2LayoutModel(config_path=list_models[model])
-    except:
-        print("Error al descargar el modelo")
-    if os.path.exists(carpeta_descarga):
-        lista=os.listdir(carpeta_descarga)
-        for carpeta in lista:
-            subcarpeta=os.join(carpeta_descarga,carpeta)
-            sublista=os.listdir(subcarpeta)
-            for archivo in sublista:
-                if archivo==nombre_descarga_modelo:
-                    path_archivo=os.join(subcarpeta,archivo)
-                    carpeta_destino_1=os.join(carpeta_destino,f"{model}")
-                    if not os.path.exists(carpeta_destino_1):
-                        os.makedirs(carpeta_destino_1)
-                    shutil.copy(path_archivo,os.join(carpeta_destino_1,f"{model}.pth"))
-                    print(f"Modelo ya descargado: {model} en carpeta {carpeta+"/"+archivo}")
-                elif archivo==nombre_descarga_config:
-                    path_archivo=os.join(subcarpeta,archivo)
-                    carpeta_destino_2=os.join(carpeta_destino,f"{model}")
-                    if not os.path.exists(carpeta_destino_2):
-                        os.makedirs(carpeta_destino_2)
-                    shutil.copy(path_archivo,os.join(carpeta_destino_2,f"{model}.yml"))
-                    print(f"Config ya descargado: {model} en carpeta {carpeta+"/"+archivo}")
-    else: 
-        print("No existe la carpeta de descarga")
-        print("La última descarga fue:",model)
-        break
-    shutil.rmtree(reiniciar_carpeta_torch)
+        gdown.download(url, output_zip, quiet=False)
+    except Exception as e:
+        print(f"❌ Error en la descarga: {e}")
+        return
+
+    # 2. Descomprimir
+    print("\n📦 Descomprimiendo modelos...")
+
+    # Crear carpeta models si no existe (o limpiarla)
+    if not os.path.exists(MODELS_DIR):
+        os.makedirs(MODELS_DIR)
+
+    try:
+        with zipfile.ZipFile(output_zip, "r") as zip_ref:
+            zip_ref.extractall(
+                BASE_DIR
+            )  # Se asume que el zip contiene la carpeta 'models' dentro
+        print(f"✅ Modelos extraídos en: {MODELS_DIR}")
+    except zipfile.BadZipFile:
+        print("❌ Error: El archivo descargado no es un ZIP válido.")
+        return
+
+    # 3. Limpieza
+    if os.path.exists(output_zip):
+        os.remove(output_zip)
+        print("🧹 Archivo temporal eliminado.")
+
+    print("\n✨ ¡Configuración de modelos completada!")
+
+
+if __name__ == "__main__":
+    setup()

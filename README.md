@@ -42,11 +42,14 @@ python -m venv venv
 source venv/bin/activate
 pip install --upgrade pip setuptools wheel
 pip install torch torchvision torchaudio
-
+pip install markdown
 # Instalar dependencias del proyecto
-pip install -r requirements.txt
+pip install -r requirements.txt 
+pip install 'git+https://github.com/facebookresearch/detectron2.git'
 
-# Nota para Linux: Si Detectron2 falla, usar:
+#si aún no se detecta detectron2 instalar lo siguiente
+pip install torch torchvision
+pip install "layoutparser[detectron2]"
 pip install 'git+[https://github.com/facebookresearch/detectron2.git](https://github.com/facebookresearch/detectron2.git)'
 ```
 #### Configuracion de modelos:
